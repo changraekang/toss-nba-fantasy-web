@@ -1,0 +1,48 @@
+.position-slot {
+  background: var(--card-background);
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.position-slot:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(49, 130, 246, 0.02);
+}
+
+.slot-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.slot-player {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-player-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.slot-player-team {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.slot-empty {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-style: italic;
+}

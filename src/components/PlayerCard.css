@@ -1,0 +1,90 @@
+.player-card {
+  display: flex;
+  align-items: center;
+  background: var(--card-background);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.player-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(49, 130, 246, 0.1);
+}
+
+.player-card.selected {
+  border-color: var(--primary-color);
+  background-color: rgba(49, 130, 246, 0.05);
+}
+
+.player-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 12px;
+  flex-shrink: 0;
+  background: var(--background-color);
+}
+
+.player-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-color);
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.player-info {
+  flex: 1;
+}
+
+.player-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.player-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.player-team,
+.player-position {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.player-position {
+  font-weight: 600;
+}
+
+.player-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: var(--background-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+}

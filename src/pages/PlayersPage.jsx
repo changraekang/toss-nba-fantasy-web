@@ -1,25 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import PlayerCard from '../components/PlayerCard';
-import { tossNbaFantasyClient } from '../api/tossNbaFantasyClient';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import PlayerCard from "../components/PlayerCard";
+import { tossNbaFantasyClient } from "../api/tossNbaFantasyClient";
+import { Page, PageTitle, LoadingContainer } from "../components/common/Layout";
 
 // Styled Components
-const Container = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: ${({ theme }) => theme.spacing.md};
-  padding-bottom: 80px; /* BottomTabNav 공간 */
-`;
-
 const Header = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
-`;
-
-const Title = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['3xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text};
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
 const HeaderRow = styled.div`
@@ -35,11 +22,13 @@ const Subtitle = styled.p`
 `;
 
 const SelectedInfo = styled.div`
-  background: ${({ theme }) => theme.colors.primary};
+  background: ${({ theme, $overCap }) =>
+    $overCap ? theme.colors.error : theme.colors.primary};
   color: white;
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  transition: all 0.2s;
 `;
 
 const FilterContainer = styled.div`
@@ -65,10 +54,13 @@ const FilterButton = styled.button`
   white-space: nowrap;
   transition: all 0.2s ease;
 
-  ${({ $active, theme }) => $active ? `
+  ${({ $active, theme }) =>
+    $active
+      ? `
     background: ${theme.colors.primary};
     color: white;
-  ` : `
+  `
+      : `
     background: ${theme.colors.backgroundDark};
     color: ${theme.colors.text};
   `}
@@ -92,17 +84,14 @@ const PlayerGrid = styled.div`
   }
 `;
 
-const LoadingText = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing.xl};
-  color: ${({ theme }) => theme.colors.textSecondary};
-`;
-
 const ErrorText = styled.div`
   text-align: center;
   padding: ${({ theme }) => theme.spacing.xl};
   color: ${({ theme }) => theme.colors.error};
 `;
+
+// Constants
+const SALARY_CAP = 100; // 기본 샐러리캡
 
 // Component
 const PlayersPage = () => {
@@ -111,19 +100,21 @@ const PlayersPage = () => {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedPosition, setSelectedPosition] = useState('ALL');
+  const [selectedPosition, setSelectedPosition] = useState("ALL");
 
-  const positions = ['ALL', 'G', 'F', 'C'];
+  const positions = ["ALL", "G", "F", "C"];
 
   useEffect(() => {
     fetchPlayers();
   }, []);
 
   useEffect(() => {
-    if (selectedPosition === 'ALL') {
+    if (selectedPosition === "ALL") {
       setFilteredPlayers(players);
     } else {
-      setFilteredPlayers(players.filter(p => p.position === selectedPosition));
+      setFilteredPlayers(
+        players.filter((p) => p.position === selectedPosition)
+      );
     }
   }, [selectedPosition, players]);
 
@@ -131,8 +122,8 @@ const PlayersPage = () => {
     try {
       setLoading(true);
       const data = await tossNbaFantasyClient.getPlayers();
-      console.log('📊 선수 데이터:', data);
-      console.log('💰 첫 번째 선수 salary:', data[0]?.salary);
+      console.log("📊 선수 데이터:", data);
+      console.log("💰 첫 번째 선수 salary:", data[0]?.salary);
       setPlayers(data);
       setFilteredPlayers(data);
     } catch (err) {
@@ -144,52 +135,67 @@ const PlayersPage = () => {
 
   const handlePlayerClick = (player) => {
     setSelectedPlayers((prev) => {
-      const isSelected = prev.find(p => p.id === player.id);
+      const isSelected = prev.find((p) => p.id === player.id);
       if (isSelected) {
         // 선택 해제
-        return prev.filter(p => p.id !== player.id);
+        return prev.filter((p) => p.id !== player.id);
       } else {
-        // 선택 추가 (최대 10명)
-        if (prev.length >= 10) {
-          alert('최대 10명까지만 선택할 수 있습니다.');
+        // 샐러리캡 체크
+        const currentTotal = prev.reduce((sum, p) => sum + (p.salary || 0), 0);
+        const newTotalSalary = currentTotal + (player.salary || 0);
+
+        if (newTotalSalary > SALARY_CAP) {
+          alert(
+            `샐러리캡을 초과했습니다!\n현재: $${currentTotal}M\n추가하려는 선수: $${player.salary}M\n합계: $${newTotalSalary}M\n샐러리캡: $${SALARY_CAP}M`
+          );
           return prev;
         }
+
         return [...prev, player];
       }
     });
   };
 
   const isSelected = (playerId) => {
-    return selectedPlayers.some(p => p.id === playerId);
+    return selectedPlayers.some((p) => p.id === playerId);
   };
 
-  const totalSalary = selectedPlayers.reduce((sum, p) => sum + (p.salary || 0), 0);
+  const totalSalary = selectedPlayers.reduce(
+    (sum, p) => sum + (p.salary || 0),
+    0
+  );
+
+  const remainingSalary = SALARY_CAP - totalSalary;
+  const isOverCap = totalSalary > SALARY_CAP;
 
   if (loading) {
     return (
-      <Container>
-        <LoadingText>선수 목록을 불러오는 중...</LoadingText>
-      </Container>
+      <Page>
+        <LoadingContainer>선수 목록을 불러오는 중...</LoadingContainer>
+      </Page>
     );
   }
 
   if (error) {
     return (
-      <Container>
+      <Page>
         <ErrorText>오류: {error}</ErrorText>
-      </Container>
+      </Page>
     );
   }
 
   return (
-    <Container>
+    <Page>
       <Header>
-        <Title>선수 선택</Title>
+        <PageTitle>선수 선택</PageTitle>
         <HeaderRow>
           <Subtitle>{filteredPlayers.length}명의 선수</Subtitle>
           {selectedPlayers.length > 0 && (
-            <SelectedInfo>
-              {selectedPlayers.length}/10명 선택 · ${totalSalary}M
+            <SelectedInfo $overCap={isOverCap}>
+              {selectedPlayers.length}명 선택 · ${totalSalary}M / $
+              {SALARY_CAP}M
+              {isOverCap && ` (초과: $${Math.abs(remainingSalary)}M)`}
+              {!isOverCap && ` (남음: $${remainingSalary}M)`}
             </SelectedInfo>
           )}
         </HeaderRow>
@@ -202,7 +208,7 @@ const PlayersPage = () => {
             $active={selectedPosition === pos}
             onClick={() => setSelectedPosition(pos)}
           >
-            {pos === 'ALL' ? '전체' : pos}
+            {pos === "ALL" ? "전체" : pos}
           </FilterButton>
         ))}
       </FilterContainer>
@@ -217,7 +223,7 @@ const PlayersPage = () => {
           />
         ))}
       </PlayerGrid>
-    </Container>
+    </Page>
   );
 };
 

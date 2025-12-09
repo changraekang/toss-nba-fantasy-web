@@ -1,7 +1,72 @@
-import React, { useState, useEffect } from 'react';
-import { fetchRankings } from '../api/tossNbaFantasyClient';
-import './RankingsPage.css';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { tossNbaFantasyClient } from "../api/tossNbaFantasyClient";
+import { Page, PageHeader, PageTitle, EmptyState, LoadingContainer } from "../components/common/Layout";
 
+// Styled Components
+
+const RankingsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+`;
+
+const RankingItem = styled.div`
+  display: flex;
+  align-items: center;
+  background: ${({ theme }) => theme.colors.background};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  padding: ${({ theme }) => theme.spacing.md};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
+`;
+
+const RankBadge = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.primary};
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  margin-right: ${({ theme }) => theme.spacing.md};
+  flex-shrink: 0;
+`;
+
+const RankingInfo = styled.div`
+  flex: 1;
+`;
+
+const TeamName = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text};
+  margin-bottom: 4px;
+`;
+
+const UserName = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const RankingScore = styled.div`
+  text-align: right;
+`;
+
+const ScoreValue = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes["2xl"]};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.primary};
+`;
+
+const ScoreLabel = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+// Component
 const RankingsPage = () => {
   const [rankings, setRankings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,14 +79,11 @@ const RankingsPage = () => {
   const loadRankings = async () => {
     try {
       setLoading(true);
-      const result = await fetchRankings(selectedWeek);
-
-      if (result.success) {
-        setRankings(result.data);
-      }
+      const data = await tossNbaFantasyClient.getRankings(selectedWeek);
+      setRankings(data);
     } catch (error) {
-      console.error('랭킹 로드 실패:', error);
-      alert('랭킹을 불러오는 중 오류가 발생했습니다.');
+      console.error("랭킹 로드 실패:", error);
+      alert("랭킹을 불러오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -29,42 +91,40 @@ const RankingsPage = () => {
 
   if (loading) {
     return (
-      <div className="page">
-        <div className="spinner"></div>
-      </div>
+      <Page>
+        <LoadingContainer>랭킹을 불러오는 중...</LoadingContainer>
+      </Page>
     );
   }
 
   return (
-    <div className="page rankings-page">
-      <div className="page-header">
-        <h1 className="page-title">Rankings</h1>
-      </div>
+    <Page>
+      <PageHeader>
+        <PageTitle>Rankings</PageTitle>
+      </PageHeader>
 
-      <div className="page-content">
-        {rankings.length === 0 ? (
-          <div className="empty-state">
-            <p>아직 랭킹 데이터가 없습니다.</p>
-          </div>
-        ) : (
-          <div className="rankings-list">
-            {rankings.map((entry) => (
-              <div key={entry.rank} className="ranking-item">
-                <div className="rank-badge">{entry.rank}</div>
-                <div className="ranking-info">
-                  <div className="team-name">{entry.teamName}</div>
-                  <div className="user-name">{entry.userName}</div>
-                </div>
-                <div className="ranking-score">
-                  <div className="score-value">{entry.cumulative.toFixed(1)}</div>
-                  <div className="score-label">Total</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+      {rankings.length === 0 ? (
+        <EmptyState>
+          <p>아직 랭킹 데이터가 없습니다.</p>
+        </EmptyState>
+      ) : (
+        <RankingsList>
+          {rankings.map((entry) => (
+            <RankingItem key={entry.rank}>
+              <RankBadge>{entry.rank}</RankBadge>
+              <RankingInfo>
+                <TeamName>{entry.teamName}</TeamName>
+                <UserName>{entry.userName}</UserName>
+              </RankingInfo>
+              <RankingScore>
+                <ScoreValue>{entry.cumulative.toFixed(1)}</ScoreValue>
+                <ScoreLabel>Total</ScoreLabel>
+              </RankingScore>
+            </RankingItem>
+          ))}
+        </RankingsList>
+      )}
+    </Page>
   );
 };
 

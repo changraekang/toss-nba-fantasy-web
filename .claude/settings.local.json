@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build)",
+      "Bash(cat TEAM_BONUS_INTEGRATION_GUIDE.md)",
+      "Bash(cat scripts/seedFantasyPlayers.js)",
+      "Bash(cat docs/TOSS_NBA_FANTASY_TEAM_BONUS_PROMPT.md)",
+      "Bash(cat docs/nba_fantasy_player_pool_24_25_allstar15.json)",
+      "Bash(cat docs/teamBonus.json)",
+      "Bash(node scripts/seedFantasyPlayers.js)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
